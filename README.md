@@ -208,17 +208,21 @@ Install the dependencies:
 pip install -r requirements.txt
 ```
 
-The application uses a local SQLite database based on the structure defined in `schema.sql`.
+Initialize the SQLite database:
 
-After configuring the database, run the application:
+```bash
+sqlite3 spartan.db < schema.sql
+```
+
+This command creates the database structure and loads the initial exercise catalog.
+
+Run the application:
 
 ```bash
 flask run
 ```
 
 Open the local address provided by Flask in your browser.
-
----
 
 ## Requirements
 
