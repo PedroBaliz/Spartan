@@ -4,7 +4,23 @@ Spartan is a full-stack web application for creating and managing personalized w
 
 The application allows users to create an account, organize workout routines, add exercises, define sets and repetitions, reorder exercises, and manage their profile through a responsive interface.
 
-The project combines frontend development, backend logic, authentication, security, relational database concepts, and containerization in a complete web application.
+The project combines frontend development, backend logic, authentication, security, relational database design, Docker containerization, persistent storage, and cloud deployment.
+
+---
+
+## Live Application
+
+Spartan is deployed on Railway and is publicly available at:
+
+**https://spartan-production-d656.up.railway.app**
+
+The production environment runs the Flask application inside a Docker container built from the project's `Dockerfile`.
+
+Application data is stored in a persistent Railway Volume mounted at `/app/data`. The `DATABASE_PATH` environment variable points SQLite to `/app/data/spartan.db`, keeping the database outside the container's ephemeral filesystem.
+
+This allows containers to be restarted, replaced, or redeployed without losing registered users, workouts, or exercise configurations.
+
+Database persistence was tested by creating application data, redeploying the service, and confirming that the user account, workout, and exercise configuration remained available.
 
 ---
 
@@ -22,7 +38,10 @@ The project combines frontend development, backend logic, authentication, securi
 - Username and password updates
 - CSRF protection
 - Automatic database initialization
-- Docker support with persistent data storage
+- Docker containerization
+- Persistent database storage
+- Cloud deployment
+- Public HTTPS access
 - Responsive desktop and mobile interface
 - Custom 404 error page
 
@@ -30,34 +49,44 @@ The project combines frontend development, backend logic, authentication, securi
 
 ## Architecture
 
-Spartan uses a server-rendered web architecture built with Flask.
+Spartan uses a server-rendered architecture built with Flask.
+
+In production, the application is containerized with Docker and deployed on Railway.
 
 ```text
-Browser
-   │
-   │ HTTP Request
-   ▼
-Flask Application
-   │
-   ├── Routes
-   ├── Authentication
-   ├── Validation
-   └── Application Logic
-   │
-   ├──────────────► SQLite Database
-   │
-   ▼
-Jinja Templates
-   │
-   ▼
-HTML + CSS
+User Browser
+     │
+     │ HTTPS
+     ▼
+Railway Public Domain
+     │
+     ▼
+Docker Container
+     │
+     ├── Python
+     ├── Flask
+     ├── Routes
+     ├── Authentication
+     ├── Validation
+     ├── Application Logic
+     │
+     └── /app/data
+            │
+            ▼
+   Persistent Railway Volume
+            │
+            └── spartan.db
 ```
 
-The browser sends requests to Flask, which handles authentication, validation, and application logic. Flask communicates with SQLite when data needs to be retrieved or modified and renders Jinja templates to generate the interface returned to the browser.
+The browser communicates with the application through a public HTTPS endpoint.
 
-This structure separates the application's presentation, backend logic, and persistent data.
+Railway builds the application from the `Dockerfile` stored in the GitHub repository and runs the resulting container.
 
-The application can also run inside a Docker container. When containerized, the SQLite database can be stored in a Docker volume, allowing application data to persist even when the container is removed and recreated.
+Inside the container, Flask handles routing, authentication, validation, database operations, and application logic. Jinja templates generate the HTML returned to the browser.
+
+Persistent application data is stored separately from the container through a Railway Volume mounted at `/app/data`.
+
+This separates the application runtime from its persistent data and allows the container to be replaced or redeployed without deleting application data.
 
 ---
 
@@ -67,13 +96,15 @@ Several design decisions were made to keep Spartan simple to use while maintaini
 
 ### Flask and Server-Side Rendering
 
-Flask was chosen as the backend framework because it provides a lightweight structure while allowing the application logic to remain explicit. Routes, authentication, validation, database operations, and access control are handled in Python, while Jinja templates generate the HTML presented to the user.
+Flask was chosen as the backend framework because it provides a lightweight structure while allowing the application logic to remain explicit.
+
+Routes, authentication, validation, database operations, and access control are handled in Python, while Jinja templates generate the HTML presented to the user.
 
 The application uses server-side rendering instead of a separate frontend framework. For Spartan's current scope, this avoids unnecessary complexity and keeps communication between the interface and backend straightforward.
 
 ### Relational Database Structure
 
-SQLite was selected because Spartan's data is naturally relational and the application does not currently require the infrastructure of a separate database server.
+SQLite was selected because Spartan's data is naturally relational and the current application does not require the infrastructure of a separate database server.
 
 Instead of storing all workout information in a single table, the database separates users, workouts, exercises, and the relationship between workouts and exercises.
 
@@ -83,65 +114,164 @@ This reduces data duplication and makes the structure easier to maintain.
 
 Exercises are stored in their own `exercises` table rather than being stored directly inside each workout.
 
-This allows the same exercise to be reused across multiple workouts without duplicating its name and muscle group. The initial catalog is created through `schema.sql`, providing a consistent set of exercises when the database is initialized.
+This allows the same exercise to be reused across multiple workouts without duplicating its name and muscle group.
+
+The initial catalog is created through `schema.sql`, providing a consistent set of exercises when the database is initialized.
 
 ### Workout-Exercise Relationship
 
 The `workout_exercises` table acts as an associative table between `workouts` and `exercises`.
 
-This design was necessary because the same exercise can belong to multiple workouts while having different sets and repetitions in each one.
+This design is necessary because the same exercise can belong to multiple workouts while having different sets and repetitions in each one.
 
-For example, the same exercise could be configured as 3 × 10 in one workout and 4 × 12 in another without modifying the original exercise stored in the catalog.
+For example, the same exercise can be configured as 3 × 10 in one workout and 4 × 12 in another without modifying the original exercise stored in the catalog.
 
 ### Exercise Ordering
 
 The `position` column in `workout_exercises` stores the order of exercises independently for each workout.
 
-This was preferred over relying on database IDs because an exercise's ID represents its record, not its intended position in a training routine. Keeping position as separate data allows users to reorder exercises without recreating them.
+This was preferred over relying on database IDs because an exercise's ID represents its database record, not its intended position in a training routine.
+
+Keeping position as separate data allows users to reorder exercises without recreating them.
 
 ### Authentication and Ownership
 
 Workouts are associated with users through `user_id`.
 
-Protected operations verify the authenticated user and the ownership of the requested workout. This prevents one account from editing or deleting another user's workout simply by changing an ID in the URL.
+Protected operations verify the authenticated user and ownership of the requested workout. This prevents one account from editing or deleting another user's workout simply by changing an ID in the URL.
 
-Passwords are stored as hashes rather than plain text, and Flask sessions are used to maintain authentication between requests.
+Passwords are stored as hashes rather than plain text, and Flask sessions maintain authentication between requests.
 
 ### CSRF Protection
 
 Forms that modify application data use CSRF protection through Flask-WTF.
 
-This adds protection against requests submitted from unauthorized external pages and applies to operations such as profile changes, password changes, workout modifications, exercise actions, and logout.
+This protects operations such as profile changes, password changes, workout modifications, exercise actions, and logout against unauthorized cross-site requests.
 
 ### Automatic Database Initialization
 
-Spartan automatically initializes its database when `spartan.db` does not exist.
+Spartan automatically initializes its database when the configured database file does not exist.
 
-The application executes `schema.sql` to create the required relational structure and populate the initial exercise catalog. This makes a fresh installation easier to run and allows a new Docker container to initialize the application without requiring a pre-existing database file.
+The application executes `schema.sql` to create the required relational structure and populate the initial exercise catalog.
 
-The database location can also be configured through the `DATABASE_PATH` environment variable. By default, the application uses `spartan.db`.
+This allows both local installations and new container environments to initialize the application without requiring a pre-existing database file.
 
-### Docker and Data Persistence
+### Environment-Based Configuration
 
-Docker support was added to provide a consistent and isolated runtime environment for the application.
+The database location can be configured using the `DATABASE_PATH` environment variable.
 
-The Docker image contains the Flask application and its Python dependencies but does not include the local SQLite database. When running the application with Docker, the database can be stored in a named Docker volume.
+When the variable is not defined, Spartan uses:
 
-This separates persistent application data from the container itself. As a result, a container can be stopped, removed, and recreated without deleting registered users, workouts, or exercise configurations stored in the database.
+```text
+spartan.db
+```
+
+In the production environment, Railway defines:
+
+```text
+DATABASE_PATH=/app/data/spartan.db
+```
+
+This allows the same application code to run in different environments without hardcoding environment-specific database paths.
+
+### Docker Containerization
+
+Spartan is containerized using Docker.
+
+The `Dockerfile` defines the Python runtime, installs the application's dependencies, copies the project files, exposes the application port, and defines the command used to start Flask.
+
+This provides a consistent and isolated execution environment regardless of the host machine.
+
+The Docker image contains the application and its runtime dependencies but does not contain the persistent SQLite database.
+
+### Persistent Storage
+
+Containers can be replaced or recreated, so persistent application data is stored outside the container.
+
+For local Docker execution, Spartan can use a named Docker volume:
+
+```text
+spartan-data
+```
+
+In production, Railway provides a persistent volume mounted at:
+
+```text
+/app/data
+```
+
+The SQLite database is stored inside this volume at:
+
+```text
+/app/data/spartan.db
+```
+
+The resulting production structure is:
+
+```text
+Docker Container
+      │
+      └── /app/data
+             │
+             ▼
+      Railway Volume
+             │
+             └── spartan.db
+```
+
+This architecture allows the application container to be redeployed without deleting registered users, workouts, or workout configurations.
+
+Persistence was verified in production by creating a user, workout, and exercise configuration, performing a Railway redeploy, and confirming that all data remained available afterward.
+
+### Cloud Deployment
+
+The production version of Spartan is deployed on Railway directly from the GitHub repository.
+
+The deployment workflow is:
+
+```text
+Local Development
+       │
+       ▼
+GitHub Repository
+       │
+       ▼
+Railway
+       │
+       │ reads Dockerfile
+       ▼
+Docker Build
+       │
+       ▼
+Docker Container
+       │
+       ├── Flask Application
+       │
+       └── /app/data
+               │
+               ▼
+        Persistent Volume
+               │
+               └── spartan.db
+```
+
+This creates a direct path between source control and the deployed application.
+
+Changes pushed to the GitHub repository can be used to rebuild and redeploy the application while persistent data remains stored independently in the Railway Volume.
 
 ### Interface and Responsive Design
 
 The interface was built with custom HTML and CSS instead of a UI framework.
 
-This provided greater control over Spartan's visual identity and allowed the interface to follow a consistent dark, high-contrast design inspired by the Spartan theme.
+This provides greater control over Spartan's visual identity and allows the interface to follow a consistent dark, high-contrast design inspired by the Spartan theme.
 
-Responsive layouts and mobile navigation were implemented so the same application can be used on both desktop and smaller screens without maintaining separate interfaces.
+Responsive layouts and mobile navigation allow the same application to work on desktop and smaller screens without maintaining separate interfaces.
 
 ### Extensibility
 
-The current architecture was designed around the project's present scope while leaving room for future features.
+The current architecture was designed around the project's present scope while leaving room for future development.
 
-Separating users, workouts, exercises, workout-specific exercise data, and runtime configuration makes it possible to later introduce features such as workout history, progression tracking, custom exercises, statistics, and cloud deployment without redesigning the application's core data model.
+Separating application logic, relational data, runtime configuration, containerization, and persistent storage makes it possible to introduce features such as workout history, progression tracking, custom exercises, statistics, or a different database system without redesigning the entire application.
 
 ---
 
@@ -201,6 +331,8 @@ Forms that modify application data are protected against Cross-Site Request Forg
 
 Workout operations also verify ownership so users cannot modify workouts belonging to other accounts.
 
+Environment variables allow environment-specific configuration to remain separate from the application code.
+
 ---
 
 ## Technologies
@@ -220,6 +352,10 @@ SQLite
 **Containerization**
 
 Docker | Docker Volumes
+
+**Cloud and Deployment**
+
+Railway | Persistent Volume | HTTPS
 
 **Development**
 
@@ -265,8 +401,8 @@ Spartan/
 
 - `app.py` — Flask application containing routes, authentication, validation, database operations, and application logic.
 - `schema.sql` — database schema and initial exercise catalog.
-- `Dockerfile` — defines the Docker image used to run Spartan in a container.
-- `.dockerignore` — prevents unnecessary or local files from being copied into the Docker image.
+- `Dockerfile` — defines the Docker image used to run Spartan.
+- `.dockerignore` — prevents unnecessary and local files from being included in the Docker build context.
 - `.gitignore` — excludes local database, environment, and generated files from version control.
 - `templates/` — Jinja templates rendered by Flask.
 - `static/css/style.css` — visual system, responsive layouts, components, and animations.
@@ -285,7 +421,7 @@ Accessibility considerations include semantic form labels, visible keyboard focu
 
 ---
 
-## Running the Project
+## Running Locally
 
 Clone the repository:
 
@@ -319,8 +455,6 @@ Open the local address provided by Flask in your browser.
 
 ## Running with Docker
 
-Spartan can also run inside a Docker container without requiring a local Python environment.
-
 Build the Docker image:
 
 ```bash
@@ -345,15 +479,57 @@ Open the application at:
 http://localhost:5000
 ```
 
-The `spartan-data` volume stores the SQLite database independently from the container. This means users, workouts, and exercise configurations remain available even if the `spartan-app` container is removed and recreated.
+The `spartan-data` volume stores the SQLite database independently from the container.
 
-To stop the running container, press:
+This means registered users, workouts, and exercise configurations remain available even if the application container is removed and recreated.
+
+---
+
+## Production Deployment
+
+Spartan is deployed on Railway using the project's GitHub repository and Docker configuration.
+
+**Live application:**
+
+https://spartan-production-d656.up.railway.app
+
+The production environment uses:
 
 ```text
-Ctrl + C
+GitHub
+   │
+   ▼
+Railway
+   │
+   ▼
+Docker Container
+   │
+   ├── Flask
+   ├── Application
+   │
+   └── /app/data
+          │
+          ▼
+   Persistent Railway Volume
+          │
+          └── spartan.db
 ```
 
-If the container is removed, it can be recreated using the same `docker run` command and the existing `spartan-data` volume.
+The Railway Volume is mounted at:
+
+```text
+/app/data
+```
+
+The production database path is configured through:
+
+```text
+DATABASE_PATH=/app/data/spartan.db
+```
+
+This keeps the SQLite database outside the lifecycle of the Docker container.
+
+The production persistence configuration was tested by creating application data, redeploying the service, and verifying that the user account, workout, exercise, sets, and repetitions remained available after the redeploy.
 
 ---
 
@@ -366,7 +542,7 @@ Flask
 Flask-WTF
 ```
 
-Docker is optional and is only required when running the containerized version of Spartan.
+Docker is optional for local development and is used for the containerized deployment.
 
 ---
 
@@ -383,7 +559,9 @@ The current version focuses on workout creation and management. Possible future 
 - Rest timers
 - Progressive overload tracking
 - Production WSGI server
-- Cloud deployment
+- Migration to a server-based database for larger deployments
+- Automated testing
+- CI/CD workflow
 
 ---
 
