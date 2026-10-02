@@ -139,13 +139,12 @@ Git | GitHub | Visual Studio Code | GitHub Codespaces
 ## Project Structure
 
 ```text
-final-project/
+Spartan/
 │
 ├── app.py
 ├── README.md
 ├── requirements.txt
 ├── schema.sql
-├── spartan.db
 │
 ├── static/
 │   ├── css/
@@ -168,14 +167,14 @@ final-project/
     └── workouts.html
 ```
 
-### Main files
+### Main Files
 
-- `app.py` — Flask application, routes, authentication, validation, database operations, and application logic.
-- `schema.sql` — relational database structure.
-- `spartan.db` — SQLite database.
+- `app.py` — Flask application containing routes, authentication, validation, database operations, and application logic.
+- `schema.sql` — relational database structure used by the application.
 - `templates/` — Jinja templates rendered by Flask.
 - `static/css/style.css` — visual system, responsive layouts, components, and animations.
-- `static/images/` — static visual assets.
+- `static/images/` — static visual assets used by the interface.
+- `requirements.txt` — Python dependencies required to run the application.
 
 ---
 
@@ -194,13 +193,13 @@ Accessibility considerations include semantic form labels, visible keyboard focu
 Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/PedroBaliz/Spartan.git
 ```
 
 Enter the project directory:
 
 ```bash
-cd final-project
+cd Spartan
 ```
 
 Install the dependencies:
@@ -209,7 +208,9 @@ Install the dependencies:
 pip install -r requirements.txt
 ```
 
-Run the application:
+The application uses a local SQLite database based on the structure defined in `schema.sql`.
+
+After configuring the database, run the application:
 
 ```bash
 flask run
