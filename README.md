@@ -58,6 +58,74 @@ This structure separates the application's presentation, backend logic, and pers
 
 ---
 
+## Design Decisions
+
+Several design decisions were made to keep Spartan simple to use while maintaining a clear and extensible application structure.
+
+### Flask and Server-Side Rendering
+
+Flask was chosen as the backend framework because it provides a lightweight structure while allowing the application logic to remain explicit. Routes, authentication, validation, database operations, and access control are handled in Python, while Jinja templates generate the HTML presented to the user.
+
+The application uses server-side rendering instead of a separate frontend framework. For Spartan's current scope, this avoids unnecessary complexity and keeps communication between the interface and backend straightforward.
+
+### Relational Database Structure
+
+SQLite was selected because Spartan's data is naturally relational and the application does not currently require the infrastructure of a separate database server.
+
+Instead of storing all workout information in a single table, the database separates users, workouts, exercises, and the relationship between workouts and exercises.
+
+This reduces data duplication and makes the structure easier to maintain.
+
+### Exercise Catalog
+
+Exercises are stored in their own `exercises` table rather than being stored directly inside each workout.
+
+This allows the same exercise to be reused across multiple workouts without duplicating its name and muscle group. The initial catalog is created through `schema.sql`, providing a consistent set of exercises when the database is initialized.
+
+### Workout-Exercise Relationship
+
+The `workout_exercises` table acts as an associative table between `workouts` and `exercises`.
+
+This design was necessary because the same exercise can belong to multiple workouts while having different sets and repetitions in each one.
+
+For example, the same exercise could be configured as 3 × 10 in one workout and 4 × 12 in another without modifying the original exercise stored in the catalog.
+
+### Exercise Ordering
+
+The `position` column in `workout_exercises` stores the order of exercises independently for each workout.
+
+This was preferred over relying on database IDs because an exercise's ID represents its record, not its intended position in a training routine. Keeping position as separate data allows users to reorder exercises without recreating them.
+
+### Authentication and Ownership
+
+Workouts are associated with users through `user_id`.
+
+Protected operations verify the authenticated user and the ownership of the requested workout. This prevents one account from editing or deleting another user's workout simply by changing an ID in the URL.
+
+Passwords are stored as hashes rather than plain text, and Flask sessions are used to maintain authentication between requests.
+
+### CSRF Protection
+
+Forms that modify application data use CSRF protection through Flask-WTF.
+
+This adds protection against requests submitted from unauthorized external pages and applies to operations such as profile changes, password changes, workout modifications, exercise actions, and logout.
+
+### Interface and Responsive Design
+
+The interface was built with custom HTML and CSS instead of a UI framework.
+
+This provided greater control over Spartan's visual identity and allowed the interface to follow a consistent dark, high-contrast design inspired by the Spartan theme.
+
+Responsive layouts and mobile navigation were implemented so the same application can be used on both desktop and smaller screens without maintaining separate interfaces.
+
+### Extensibility
+
+The current architecture was designed around the project's present scope while leaving room for future features.
+
+Separating users, workouts, exercises, and workout-specific exercise data makes it possible to later introduce features such as workout history, progression tracking, custom exercises, statistics, and cloud deployment without redesigning the application's core data model.
+
+---
+
 ## Database
 
 Spartan uses SQLite as its relational database.
