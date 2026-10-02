@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block title %}Spartan{% endblock %}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+
+    <!-- =====================================
+         NAVBAR
+    ====================================== -->
+
+    <nav class="navbar">
+
+        <!-- LOGO -->
+
+        <a class="navbar-brand" href="{{ url_for('index') }}">
+            <img src="{{ url_for('static', filename='images/Spartan_logo.png') }}" alt="Logo Spartan" class="navbar-logo">
+        </a>
+
+
+        <!-- BOTÃO MOBILE -->
+
+        <button class="navbar-toggle" type="button" aria-label="Abrir menu" aria-expanded="false" aria-controls="navbar-links">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+
+        <!-- LINKS -->
+
+        <div class="navbar-links" id="navbar-links">
+
+            {% if session.get("user_id") %}
+
+                <a href="{{ url_for('workouts') }}">Meus Treinos</a>
+
+                <a href="{{ url_for('new_workout') }}">Novo Treino</a>
+
+                <a href="{{ url_for('profile') }}">Perfil</a>
+
+                <form class="navbar-logout-form" method="post" action="{{ url_for('logout') }}">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="navbar-logout" type="submit">Sair</button>
+                </form>
+
+            {% else %}
+
+                <a href="{{ url_for('login') }}">Entrar</a>
+
+                <a class="navbar-register" href="{{ url_for('register') }}">Criar conta</a>
+
+            {% endif %}
+
+        </div>
+
+    </nav>
+
+
+    <!-- =====================================
+         MENSAGENS
+    ====================================== -->
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+
+        {% if messages %}
+
+            <div class="flash-container">
+
+                {% for category, message in messages %}
+                    <div class="flash-message flash-{{ category }}">{{ message }}</div>
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- =====================================
+         CONTEÚDO
+    ====================================== -->
+
+    <main>
+        {% block main %}
+        {% endblock %}
+    </main>
+
+
+    <!-- =====================================
+         MENU MOBILE
+    ====================================== -->
+
+    <script>
+
+        const navbarToggle = document.querySelector(".navbar-toggle");
+        const navbarLinks = document.querySelector(".navbar-links");
+
+        navbarToggle.addEventListener("click", function () {
+
+            navbarLinks.classList.toggle("active");
+
+            const isOpen = navbarLinks.classList.contains("active");
+
+            navbarToggle.classList.toggle("active", isOpen);
+            navbarToggle.setAttribute("aria-expanded", isOpen);
+
+        });
+
+
+        /* Fecha o menu após selecionar uma opção */
+
+        navbarLinks.querySelectorAll("a, button[type='submit']").forEach(function (item) {
+
+            item.addEventListener("click", function () {
+
+                navbarLinks.classList.remove("active");
+                navbarToggle.classList.remove("active");
+                navbarToggle.setAttribute("aria-expanded", "false");
+
+            });
+
+        });
+
+    </script>
+
+</body>
+
+</html>

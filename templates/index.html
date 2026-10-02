@@ -1,0 +1,153 @@
+{% extends "layout.html" %}
+
+{% block title %}Spartan | Training System{% endblock %}
+
+{% block main %}
+
+<section class="hero">
+
+    <div class="hero-content">
+
+        <span class="section-label">SPARTAN TRAINING SYSTEM</span>
+
+        <h1>
+            Construa.<br>
+            Treine.<br>
+            <span>Evolua.</span>
+        </h1>
+
+        <p>
+            Organize seus treinos, controle exercícios, séries e repetições
+            em uma experiência simples e focada na sua evolução.
+        </p>
+
+        <div class="hero-actions">
+
+            {% if session.get("user_id") %}
+
+                <a class="btn-primary hero-button" href="{{ url_for('workouts') }}">
+                    Acessar meus treinos →
+                </a>
+
+                <a class="btn-secondary hero-button" href="{{ url_for('new_workout') }}">
+                    + Novo treino
+                </a>
+
+            {% else %}
+
+                <a class="btn-primary hero-button" href="{{ url_for('register') }}">
+                    Começar agora →
+                </a>
+
+                <a class="btn-secondary hero-button" href="{{ url_for('login') }}">
+                    Entrar
+                </a>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <div class="hero-visual">
+
+        <div class="hero-card">
+
+            <div class="hero-card-top">
+
+                <div>
+                    <span>PRÓXIMO TREINO</span>
+                    <h3>PERNA A</h3>
+                </div>
+
+                <span class="hero-card-number">01</span>
+
+            </div>
+
+
+            <div class="hero-exercises">
+
+                <div class="hero-exercise">
+                    <span>01</span>
+
+                    <div>
+                        <strong>Agachamento Smith</strong>
+                        <small>3 × 10</small>
+                    </div>
+                </div>
+
+                <div class="hero-exercise">
+                    <span>02</span>
+
+                    <div>
+                        <strong>Cadeira Extensora</strong>
+                        <small>3 × 12</small>
+                    </div>
+                </div>
+
+                <div class="hero-exercise">
+                    <span>03</span>
+
+                    <div>
+                        <strong>Mesa Flexora</strong>
+                        <small>3 × 12</small>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="hero-card-footer">
+                <span>5 EXERCÍCIOS</span>
+                <span>SPARTAN</span>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<section class="features">
+
+    <div class="features-header">
+        <span class="section-label">BUILT FOR TRAINING</span>
+        <h2>Seu treino. Sua estrutura.</h2>
+    </div>
+
+
+    <div class="feature-grid">
+
+        <article class="feature-card">
+            <span class="feature-number">01</span>
+
+            <h3>Organize</h3>
+
+            <p>Crie diferentes treinos e mantenha sua rotina organizada.</p>
+        </article>
+
+
+        <article class="feature-card">
+            <span class="feature-number">02</span>
+
+            <h3>Personalize</h3>
+
+            <p>Escolha exercícios e determine séries e repetições.</p>
+        </article>
+
+
+        <article class="feature-card">
+            <span class="feature-number">03</span>
+
+            <h3>Evolua</h3>
+
+            <p>Construa uma estrutura consistente para acompanhar seus treinos.</p>
+        </article>
+
+    </div>
+
+</section>
+
+{% endblock %}

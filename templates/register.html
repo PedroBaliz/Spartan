@@ -1,0 +1,101 @@
+{% extends "layout.html" %}
+
+{% block title %}Criar Conta | Spartan{% endblock %}
+
+{% block main %}
+
+<section class="auth-page">
+
+    <div class="auth-brand">
+
+        <span class="section-label">SPARTAN TRAINING SYSTEM</span>
+
+        <h1>Comece sua jornada.</h1>
+
+        <p>Crie sua conta e monte seus próprios treinos.</p>
+
+    </div>
+
+
+    <div class="auth-card">
+
+        <div class="auth-card-header">
+            <h2>Criar conta</h2>
+            <p>Preencha seus dados para continuar.</p>
+        </div>
+
+
+        <form method="post">
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group">
+
+                <label for="username">Usuário</label>
+
+                <input
+                    type="text"
+                    id="username"
+                    name="username"
+                    placeholder="Escolha um usuário"
+                    autocomplete="username"
+                    minlength="3"
+                    maxlength="30"
+                    required
+                    autofocus
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="password">Senha</label>
+
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    placeholder="Crie uma senha"
+                    autocomplete="new-password"
+                    minlength="6"
+                    required
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="confirmation">Confirmar senha</label>
+
+                <input
+                    type="password"
+                    id="confirmation"
+                    name="confirmation"
+                    placeholder="Repita sua senha"
+                    autocomplete="new-password"
+                    minlength="6"
+                    required
+                >
+
+            </div>
+
+
+            <button class="btn-primary auth-submit" type="submit">
+                Criar conta
+            </button>
+
+        </form>
+
+
+        <div class="auth-footer">
+            <span>Já possui uma conta?</span>
+            <a href="{{ url_for('login') }}">Entrar</a>
+        </div>
+
+    </div>
+
+</section>
+
+{% endblock %}

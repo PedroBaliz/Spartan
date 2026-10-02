@@ -1,0 +1,202 @@
+{% extends "layout.html" %}
+
+{% block title %}Perfil | Spartan{% endblock %}
+
+{% block main %}
+
+<section class="profile-page">
+
+    <!-- =====================================
+         CABEÇALHO
+    ====================================== -->
+
+    <div class="profile-header">
+        <span class="section-label">ACCOUNT / PROFILE</span>
+
+        <h1>Seu perfil</h1>
+
+        <p>Informações e visão geral da sua conta Spartan.</p>
+    </div>
+
+
+    <!-- =====================================
+         IDENTIDADE DO USUÁRIO
+    ====================================== -->
+
+    <div class="profile-identity">
+
+        <div class="profile-avatar">
+            {{ user["username"][0]|upper }}
+        </div>
+
+        <div class="profile-user-info">
+            <span class="profile-label">USUÁRIO</span>
+            <h2>{{ user["username"] }}</h2>
+        </div>
+
+    </div>
+
+
+    <!-- =====================================
+         ESTATÍSTICAS
+    ====================================== -->
+
+    <section class="profile-section">
+
+        <span class="section-label">VISÃO GERAL</span>
+
+        <div class="profile-stats">
+
+            <div class="profile-stat-card">
+                <strong>{{ workout_count }}</strong>
+                <span>TREINOS</span>
+            </div>
+
+            <div class="profile-stat-card">
+                <strong>{{ exercise_count }}</strong>
+                <span>EXERCÍCIOS</span>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================
+         CONTA / ALTERAR NOME
+    ====================================== -->
+
+    <section class="profile-section">
+
+        <span class="section-label">CONTA</span>
+
+        <div class="profile-account">
+
+            <form class="profile-edit-form" method="post">
+
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="profile-edit-field">
+
+                    <label for="username">Nome de usuário</label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        value="{{ user['username'] }}"
+                        minlength="3"
+                        maxlength="30"
+                        autocomplete="username"
+                        required
+                    >
+
+                </div>
+
+                <button class="btn-primary" type="submit">
+                    Salvar alteração
+                </button>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================
+         SEGURANÇA / ALTERAR SENHA
+    ====================================== -->
+
+    <section class="profile-section">
+
+        <span class="section-label">SEGURANÇA</span>
+
+        <div class="profile-account">
+
+            <form class="password-form" action="{{ url_for('change_password') }}" method="post">
+
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                <div class="form-group">
+
+                    <label for="current_password">Senha atual</label>
+
+                    <input
+                        type="password"
+                        id="current_password"
+                        name="current_password"
+                        placeholder="Digite sua senha atual"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                </div>
+
+                <div class="password-grid">
+
+                    <div class="form-group">
+
+                        <label for="new_password">Nova senha</label>
+
+                        <input
+                            type="password"
+                            id="new_password"
+                            name="new_password"
+                            placeholder="Nova senha"
+                            minlength="6"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                    </div>
+
+                    <div class="form-group">
+
+                        <label for="confirmation">Confirmar nova senha</label>
+
+                        <input
+                            type="password"
+                            id="confirmation"
+                            name="confirmation"
+                            placeholder="Repita a nova senha"
+                            minlength="6"
+                            autocomplete="new-password"
+                            required
+                        >
+
+                    </div>
+
+                </div>
+
+                <div class="password-actions">
+                    <button class="btn-secondary" type="submit">Alterar senha</button>
+                </div>
+
+            </form>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================
+         AÇÕES
+    ====================================== -->
+
+    <div class="profile-actions">
+
+        <a class="btn-secondary" href="{{ url_for('workouts') }}">
+            Meus treinos
+        </a>
+
+        <form class="profile-logout-form" action="{{ url_for('logout') }}" method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="profile-logout" type="submit">Sair da conta</button>
+        </form>
+
+    </div>
+
+</section>
+
+{% endblock %}

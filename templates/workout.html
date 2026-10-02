@@ -1,0 +1,227 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ workout["name"] }} | Spartan{% endblock %}
+
+{% block main %}
+
+<section class="workout-header">
+
+    <div>
+        <span class="section-label">TRAINING / WORKOUT</span>
+
+        <h1>{{ workout["name"] }}</h1>
+
+        <p>Gerencie os exercícios, séries e repetições deste treino.</p>
+    </div>
+
+
+    <div class="workout-header-actions">
+
+        <a class="btn-secondary" href="{{ url_for('edit_workout', workout_id=workout['id']) }}">
+            Editar treino
+        </a>
+
+        <a class="btn-primary" href="{{ url_for('add_exercise', workout_id=workout['id']) }}">
+            + Adicionar exercício
+        </a>
+
+    </div>
+
+</section>
+
+
+<!-- =====================================
+     EXERCÍCIOS
+====================================== -->
+
+<section class="exercise-section">
+
+    <div class="section-title">
+        <h2>Exercícios</h2>
+
+        <span class="exercise-count">
+            {{ exercises|length }}
+        </span>
+    </div>
+
+
+    {% if exercises %}
+
+        <div class="exercise-list">
+
+            {% for exercise in exercises %}
+
+                <article class="exercise-card">
+
+                    <!-- NÚMERO -->
+
+                    <div class="exercise-number">
+                        {{ "%02d"|format(loop.index) }}
+                    </div>
+
+
+                    <!-- INFORMAÇÕES -->
+
+                    <div class="exercise-info">
+
+                        <span class="exercise-group">
+                            {{ exercise["muscle_group"] }}
+                        </span>
+
+                        <h3>{{ exercise["name"] }}</h3>
+
+                    </div>
+
+
+                    <!-- SÉRIES / REPETIÇÕES -->
+
+                    <div class="exercise-stats">
+
+                        <div class="exercise-stat">
+                            <strong>{{ exercise["sets"] }}</strong>
+                            <span>SÉRIES</span>
+                        </div>
+
+                        <div class="stat-divider">×</div>
+
+                        <div class="exercise-stat">
+                            <strong>{{ exercise["reps"] }}</strong>
+                            <span>REPS</span>
+                        </div>
+
+                    </div>
+
+
+                    <!-- AÇÕES -->
+
+                    <div class="exercise-actions">
+
+                        <!-- SUBIR -->
+
+                        {% if not loop.first %}
+
+                            <form
+                                class="order-form"
+                                action="{{ url_for('move_exercise_up', workout_id=workout['id'], workout_exercise_id=exercise['id']) }}"
+                                method="post"
+                            >
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                                <button
+                                    class="btn-order"
+                                    type="submit"
+                                    title="Mover para cima"
+                                    aria-label="Mover exercício para cima"
+                                >
+                                    ↑
+                                </button>
+                            </form>
+
+                        {% endif %}
+
+
+                        <!-- DESCER -->
+
+                        {% if not loop.last %}
+
+                            <form
+                                class="order-form"
+                                action="{{ url_for('move_exercise_down', workout_id=workout['id'], workout_exercise_id=exercise['id']) }}"
+                                method="post"
+                            >
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                                <button
+                                    class="btn-order"
+                                    type="submit"
+                                    title="Mover para baixo"
+                                    aria-label="Mover exercício para baixo"
+                                >
+                                    ↓
+                                </button>
+                            </form>
+
+                        {% endif %}
+
+
+                        <!-- EDITAR -->
+
+                        <a href="{{ url_for('edit_exercise', workout_id=workout['id'], workout_exercise_id=exercise['id']) }}">
+                            Editar
+                        </a>
+
+
+                        <!-- REMOVER -->
+
+                        <form
+                            action="{{ url_for('delete_exercise', workout_id=workout['id'], workout_exercise_id=exercise['id']) }}"
+                            method="post"
+                            onsubmit="return confirm('Tem certeza que deseja remover este exercício da ficha?');"
+                        >
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                            <button class="btn-delete-small" type="submit">
+                                Remover
+                            </button>
+                        </form>
+
+                    </div>
+
+                </article>
+
+            {% endfor %}
+
+        </div>
+
+
+    {% else %}
+
+        <!-- =====================================
+             FICHA VAZIA
+        ====================================== -->
+
+        <div class="empty-state">
+
+            <div class="empty-icon">+</div>
+
+            <h2>Nenhum exercício</h2>
+
+            <p>Adicione exercícios para montar este treino.</p>
+
+            <a class="btn-primary" href="{{ url_for('add_exercise', workout_id=workout['id']) }}">
+                Adicionar exercício
+            </a>
+
+        </div>
+
+    {% endif %}
+
+</section>
+
+
+<!-- =====================================
+     RODAPÉ DA FICHA
+====================================== -->
+
+<footer class="workout-footer">
+
+    <a class="back-link" href="{{ url_for('workouts') }}">
+        ← Voltar para meus treinos
+    </a>
+
+
+    <form
+        action="{{ url_for('delete_workout', workout_id=workout['id']) }}"
+        method="post"
+        onsubmit="return confirm('Tem certeza que deseja excluir este treino? Todos os exercícios desta ficha serão removidos.');"
+    >
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+        <button class="btn-danger" type="submit">
+            Excluir treino
+        </button>
+    </form>
+
+</footer>
+
+{% endblock %}

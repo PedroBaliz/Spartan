@@ -1,0 +1,139 @@
+{% extends "layout.html" %}
+
+{% block title %}Adicionar Exercício | Spartan{% endblock %}
+
+{% block main %}
+
+<section class="form-page">
+
+    <div class="form-header">
+        <span class="section-label">TRAINING / ADD EXERCISE</span>
+
+        <h1>Adicionar exercício</h1>
+
+        <p>Escolha o exercício e defina o volume do treino.</p>
+    </div>
+
+
+    <div class="form-card">
+
+        <form method="post">
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+
+            <!-- EXERCÍCIO -->
+
+            <div class="form-group">
+
+                <label for="exercise_id">Exercício</label>
+
+                <select id="exercise_id" name="exercise_id" required autofocus>
+
+                    <option value="" disabled selected>Selecione um exercício</option>
+
+                    {% for exercise in exercises %}
+
+                        <option value="{{ exercise['id'] }}">
+                            {{ exercise["muscle_group"] }} — {{ exercise["name"] }}
+                        </option>
+
+                    {% endfor %}
+
+                </select>
+
+                <span class="form-hint">Selecione um exercício disponível no catálogo.</span>
+
+            </div>
+
+
+            <!-- SÉRIES E REPETIÇÕES -->
+
+            <div class="volume-grid">
+
+                <div class="form-group">
+
+                    <label for="sets">Séries</label>
+
+                    <input
+                        type="number"
+                        id="sets"
+                        name="sets"
+                        min="1"
+                        max="10"
+                        placeholder="3"
+                        required
+                    >
+
+                    <span class="form-hint">Máximo de 10 séries.</span>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="reps">Repetições</label>
+
+                    <input
+                        type="number"
+                        id="reps"
+                        name="reps"
+                        min="1"
+                        max="30"
+                        placeholder="12"
+                        required
+                    >
+
+                    <span class="form-hint">Máximo de 30 repetições.</span>
+
+                </div>
+
+            </div>
+
+
+            <!-- PREVIEW -->
+
+            <div class="volume-preview">
+
+                <span class="volume-preview-label">VOLUME</span>
+
+                <div class="volume-preview-content">
+
+                    <div>
+                        <strong>1–10</strong>
+                        <span>SÉRIES</span>
+                    </div>
+
+                    <span class="volume-x">×</span>
+
+                    <div>
+                        <strong>1–30</strong>
+                        <span>REPETIÇÕES</span>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- AÇÕES -->
+
+            <div class="form-actions">
+
+                <a class="btn-secondary" href="{{ url_for('workout', workout_id=workout_id) }}">
+                    Cancelar
+                </a>
+
+                <button class="btn-primary" type="submit">
+                    Adicionar exercício
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,77 @@
+{% extends "layout.html" %}
+
+{% block title %}Meus Treinos | Spartan{% endblock %}
+
+{% block main %}
+
+<section class="dashboard-header">
+
+    <div>
+        <span class="section-label">TRAINING SYSTEM</span>
+
+        <h1>Meus Treinos</h1>
+
+        <p>Organize sua rotina e acesse seus treinos.</p>
+    </div>
+
+    <a class="btn-primary" href="{{ url_for('new_workout') }}">
+        + Novo treino
+    </a>
+
+</section>
+
+
+{% if workouts %}
+
+    <section class="workouts-section">
+
+        <div class="section-title">
+            <h2>Seus treinos</h2>
+        </div>
+
+
+        <div class="workout-grid">
+
+            {% for workout in workouts %}
+
+                <a class="workout-card" href="{{ url_for('workout', workout_id=workout['id']) }}">
+
+                    <span class="workout-number">
+                        {{ "%02d"|format(loop.index) }}
+                    </span>
+
+                    <div class="workout-info">
+                        <span class="workout-label">TREINO</span>
+                        <h3>{{ workout["name"] }}</h3>
+                    </div>
+
+                    <span class="workout-arrow">→</span>
+
+                </a>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+
+{% else %}
+
+    <section class="empty-state">
+
+        <div class="empty-icon">+</div>
+
+        <h2>Nenhum treino criado</h2>
+
+        <p>Crie seu primeiro treino para começar a organizar sua rotina.</p>
+
+        <a class="btn-primary" href="{{ url_for('new_workout') }}">
+            Criar primeiro treino
+        </a>
+
+    </section>
+
+{% endif %}
+
+{% endblock %}

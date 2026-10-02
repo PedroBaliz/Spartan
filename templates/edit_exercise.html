@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block title %}Editar Exercício | Spartan{% endblock %}
+
+{% block main %}
+
+<section class="form-page">
+
+    <div class="form-header">
+        <span class="section-label">TRAINING / EDIT EXERCISE</span>
+
+        <h1>Editar exercício</h1>
+
+        <p>Altere as séries e repetições deste exercício.</p>
+    </div>
+
+
+    <div class="form-card">
+
+        <div class="selected-exercise">
+            <span class="selected-exercise-label">EXERCÍCIO</span>
+            <h2>{{ exercise["name"] }}</h2>
+        </div>
+
+
+        <form method="post">
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="volume-grid">
+
+                <div class="form-group">
+
+                    <label for="sets">Séries</label>
+
+                    <input
+                        type="number"
+                        id="sets"
+                        name="sets"
+                        min="1"
+                        max="10"
+                        value="{{ exercise['sets'] }}"
+                        required
+                        autofocus
+                    >
+
+                    <span class="form-hint">Máximo de 10 séries.</span>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label for="reps">Repetições</label>
+
+                    <input
+                        type="number"
+                        id="reps"
+                        name="reps"
+                        min="1"
+                        max="30"
+                        value="{{ exercise['reps'] }}"
+                        required
+                    >
+
+                    <span class="form-hint">Máximo de 30 repetições.</span>
+
+                </div>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <a class="btn-secondary" href="{{ url_for('workout', workout_id=workout_id) }}">
+                    Cancelar
+                </a>
+
+                <button class="btn-primary" type="submit">
+                    Salvar alterações
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,61 @@
+{% extends "layout.html" %}
+
+{% block title %}Editar treino | Spartan{% endblock %}
+
+{% block main %}
+
+<section class="form-page">
+
+    <div class="form-header">
+        <span class="section-label">TRAINING / EDIT WORKOUT</span>
+
+        <h1>Editar treino</h1>
+
+        <p>Altere o nome do seu treino.</p>
+    </div>
+
+
+    <div class="form-card">
+
+        <form method="post">
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group">
+
+                <label for="name">Nome do treino</label>
+
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value="{{ workout['name'] }}"
+                    maxlength="50"
+                    required
+                    autofocus
+                >
+
+                <span class="form-hint">O nome pode ter no máximo 50 caracteres.</span>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <a class="btn-secondary" href="{{ url_for('workout', workout_id=workout['id']) }}">
+                    Cancelar
+                </a>
+
+                <button class="btn-primary" type="submit">
+                    Salvar alterações
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</section>
+
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+
+{% block title %}Página não encontrada | Spartan{% endblock %}
+
+{% block main %}
+
+<section class="error-page">
+
+    <div class="error-code">404</div>
+
+    <span class="section-label">SPARTAN / NOT FOUND</span>
+
+    <h1>Página não encontrada.</h1>
+
+    <p>O conteúdo que você tentou acessar não existe ou não está disponível.</p>
+
+    <div class="error-actions">
+
+        {% if session.get("user_id") %}
+
+            <a class="btn-primary" href="{{ url_for('workouts') }}">
+                Ir para meus treinos
+            </a>
+
+        {% else %}
+
+            <a class="btn-primary" href="{{ url_for('index') }}">
+                Voltar ao início
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</section>
+
+{% endblock %}

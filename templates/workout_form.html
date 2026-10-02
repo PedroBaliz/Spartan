@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block title %}Novo Treino | Spartan{% endblock %}
+
+{% block main %}
+
+<section class="form-page">
+
+    <div class="form-header">
+        <span class="section-label">TRAINING / NEW WORKOUT</span>
+
+        <h1>Criar novo treino</h1>
+
+        <p>Crie uma nova divisão para organizar seus exercícios.</p>
+    </div>
+
+
+    <div class="form-card">
+
+        <form method="post">
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <div class="form-group">
+
+                <label for="name">Nome do treino</label>
+
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    placeholder="Ex: Perna A"
+                    maxlength="50"
+                    required
+                    autofocus
+                >
+
+                <span class="form-hint">
+                    Escolha um nome curto e fácil de identificar.
+                </span>
+
+            </div>
+
+
+            <div class="form-actions">
+
+                <a class="btn-secondary" href="{{ url_for('workouts') }}">
+                    Cancelar
+                </a>
+
+                <button class="btn-primary" type="submit">
+                    Criar treino
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
+
+</section>
+
+{% endblock %}
