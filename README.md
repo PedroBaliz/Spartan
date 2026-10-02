@@ -4,7 +4,7 @@ Spartan is a full-stack web application for creating and managing personalized w
 
 The application allows users to create an account, organize workout routines, add exercises, define sets and repetitions, reorder exercises, and manage their profile through a responsive interface.
 
-The project combines frontend development, backend logic, authentication, security, and relational database concepts in a complete web application.
+The project combines frontend development, backend logic, authentication, security, relational database concepts, and containerization in a complete web application.
 
 ---
 
@@ -21,6 +21,8 @@ The project combines frontend development, backend logic, authentication, securi
 - User profile management
 - Username and password updates
 - CSRF protection
+- Automatic database initialization
+- Docker support with persistent data storage
 - Responsive desktop and mobile interface
 - Custom 404 error page
 
@@ -42,8 +44,7 @@ Flask Application
    ├── Validation
    └── Application Logic
    │
-   ▼
-SQLite Database
+   ├──────────────► SQLite Database
    │
    ▼
 Jinja Templates
@@ -52,9 +53,11 @@ Jinja Templates
 HTML + CSS
 ```
 
-The browser sends requests to Flask, which handles authentication, validation, and application logic. When necessary, Flask communicates with SQLite to retrieve or modify data and then renders the corresponding Jinja template.
+The browser sends requests to Flask, which handles authentication, validation, and application logic. Flask communicates with SQLite when data needs to be retrieved or modified and renders Jinja templates to generate the interface returned to the browser.
 
 This structure separates the application's presentation, backend logic, and persistent data.
+
+The application can also run inside a Docker container. When containerized, the SQLite database can be stored in a Docker volume, allowing application data to persist even when the container is removed and recreated.
 
 ---
 
@@ -110,6 +113,22 @@ Forms that modify application data use CSRF protection through Flask-WTF.
 
 This adds protection against requests submitted from unauthorized external pages and applies to operations such as profile changes, password changes, workout modifications, exercise actions, and logout.
 
+### Automatic Database Initialization
+
+Spartan automatically initializes its database when `spartan.db` does not exist.
+
+The application executes `schema.sql` to create the required relational structure and populate the initial exercise catalog. This makes a fresh installation easier to run and allows a new Docker container to initialize the application without requiring a pre-existing database file.
+
+The database location can also be configured through the `DATABASE_PATH` environment variable. By default, the application uses `spartan.db`.
+
+### Docker and Data Persistence
+
+Docker support was added to provide a consistent and isolated runtime environment for the application.
+
+The Docker image contains the Flask application and its Python dependencies but does not include the local SQLite database. When running the application with Docker, the database can be stored in a named Docker volume.
+
+This separates persistent application data from the container itself. As a result, a container can be stopped, removed, and recreated without deleting registered users, workouts, or exercise configurations stored in the database.
+
 ### Interface and Responsive Design
 
 The interface was built with custom HTML and CSS instead of a UI framework.
@@ -122,7 +141,7 @@ Responsive layouts and mobile navigation were implemented so the same applicatio
 
 The current architecture was designed around the project's present scope while leaving room for future features.
 
-Separating users, workouts, exercises, and workout-specific exercise data makes it possible to later introduce features such as workout history, progression tracking, custom exercises, statistics, and cloud deployment without redesigning the application's core data model.
+Separating users, workouts, exercises, workout-specific exercise data, and runtime configuration makes it possible to later introduce features such as workout history, progression tracking, custom exercises, statistics, and cloud deployment without redesigning the application's core data model.
 
 ---
 
@@ -198,6 +217,10 @@ Flask | Flask-WTF | Jinja | Werkzeug
 
 SQLite
 
+**Containerization**
+
+Docker | Docker Volumes
+
 **Development**
 
 Git | GitHub | Visual Studio Code | GitHub Codespaces
@@ -210,6 +233,9 @@ Git | GitHub | Visual Studio Code | GitHub Codespaces
 Spartan/
 │
 ├── app.py
+├── Dockerfile
+├── .dockerignore
+├── .gitignore
 ├── README.md
 ├── requirements.txt
 ├── schema.sql
@@ -238,7 +264,10 @@ Spartan/
 ### Main Files
 
 - `app.py` — Flask application containing routes, authentication, validation, database operations, and application logic.
-- `schema.sql` — relational database structure used by the application.
+- `schema.sql` — database schema and initial exercise catalog.
+- `Dockerfile` — defines the Docker image used to run Spartan in a container.
+- `.dockerignore` — prevents unnecessary or local files from being copied into the Docker image.
+- `.gitignore` — excludes local database, environment, and generated files from version control.
 - `templates/` — Jinja templates rendered by Flask.
 - `static/css/style.css` — visual system, responsive layouts, components, and animations.
 - `static/images/` — static visual assets used by the interface.
@@ -276,21 +305,55 @@ Install the dependencies:
 pip install -r requirements.txt
 ```
 
-Initialize the SQLite database:
-
-```bash
-sqlite3 spartan.db < schema.sql
-```
-
-This command creates the database structure and loads the initial exercise catalog.
-
 Run the application:
 
 ```bash
 flask run
 ```
 
+If `spartan.db` does not exist, Spartan automatically creates the database using `schema.sql` and loads the initial exercise catalog.
+
 Open the local address provided by Flask in your browser.
+
+---
+
+## Running with Docker
+
+Spartan can also run inside a Docker container without requiring a local Python environment.
+
+Build the Docker image:
+
+```bash
+docker build -t spartan .
+```
+
+Create a persistent Docker volume:
+
+```bash
+docker volume create spartan-data
+```
+
+Run the container:
+
+```bash
+docker run --name spartan-app -p 5000:5000 -e DATABASE_PATH=/app/data/spartan.db -v spartan-data:/app/data spartan
+```
+
+Open the application at:
+
+```text
+http://localhost:5000
+```
+
+The `spartan-data` volume stores the SQLite database independently from the container. This means users, workouts, and exercise configurations remain available even if the `spartan-app` container is removed and recreated.
+
+To stop the running container, press:
+
+```text
+Ctrl + C
+```
+
+If the container is removed, it can be recreated using the same `docker run` command and the existing `spartan-data` volume.
 
 ---
 
@@ -302,6 +365,8 @@ The Python dependencies are listed in `requirements.txt`:
 Flask
 Flask-WTF
 ```
+
+Docker is optional and is only required when running the containerized version of Spartan.
 
 ---
 
@@ -317,7 +382,7 @@ The current version focuses on workout creation and management. Possible future 
 - Workout duplication
 - Rest timers
 - Progressive overload tracking
-- Docker containerization
+- Production WSGI server
 - Cloud deployment
 
 ---

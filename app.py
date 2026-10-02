@@ -16,8 +16,7 @@ app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
 
 csrf = CSRFProtect(app)
 
-DATABASE = "spartan.db"
-
+DATABASE = os.environ.get("DATABASE_PATH", "spartan.db")
 
 # =========================================
 # BANCO DE DADOS
@@ -29,6 +28,16 @@ def get_db_connection():
     db.execute("PRAGMA foreign_keys = ON")
     return db
 
+
+def init_db():
+    if os.path.exists(DATABASE):
+        return
+
+    with sqlite3.connect(DATABASE) as db:
+        with open("schema.sql", "r", encoding="utf-8") as schema:
+            db.executescript(schema.read())    
+
+init_db()
 
 # =========================================
 # HELPERS
