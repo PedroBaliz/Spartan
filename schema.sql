@@ -43,3 +43,26 @@ CREATE TABLE workout_exercises (
     FOREIGN KEY (exercise_id)
         REFERENCES exercises(id)
 );
+
+
+-- ==========================================
+-- CATÁLOGO INICIAL DE EXERCÍCIOS
+-- ==========================================
+
+INSERT INTO exercises (name, muscle_group) VALUES
+    ('Agachamento Smith', 'Perna'),
+    ('Cadeira Extensora', 'Perna'),
+    ('Mesa Flexora', 'Perna'),
+    ('Cadeira Adutora', 'Perna'),
+    ('Panturrilha', 'Perna'),
+    ('Puxada Alta', 'Costas'),
+    ('Puxada Fechada', 'Costas'),
+    ('Bíceps Polia', 'Bíceps'),
+    ('Bíceps Corda', 'Bíceps'),
+    ('Antebraço Polia', 'Antebraço'),
+    ('Abdômen', 'Abdômen'),
+    ('Supino 45°', 'Peito'),
+    ('Crucifixo', 'Peito'),
+    ('Tríceps Polia', 'Tríceps'),
+    ('Tríceps Corda', 'Tríceps'),
+    ('Elevação Lateral', 'Ombro');
