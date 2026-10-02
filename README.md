@@ -224,6 +224,8 @@ flask run
 
 Open the local address provided by Flask in your browser.
 
+---
+
 ## Requirements
 
 The Python dependencies are listed in `requirements.txt`:
